@@ -1,0 +1,28 @@
+{
+	"name": "generic-butt",
+	"version": "1.0.0",
+	"api_version": "1.0.0",
+	"keywords": [
+		"Protocol",
+		"Generic"
+	],
+	"manufacturer": "Generic",
+	"product": "BUTT Controller (broadcast using this tool)",
+	"shortname": "butt",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-generic-butt.git"
+	},
+	"author": "Hossam Hammady <github@hammady.net>",
+	"contributors": [
+	],
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/bitfocus/companion-module-generic-butt/issues"
+	},
+	"homepage": "https://github.com/bitfocus/companion-module-generic-butt#readme"
+}
