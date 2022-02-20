@@ -26,52 +26,45 @@ class instance extends instance_skel {
 	}
 
 	static GetUpgradeScripts() {
-		return [
-			function v1_1_4(context, config, actions) {
-				let updated = false
-
-				actions.forEach((action) => {
-					// set default content-type on older actions
-					if (['post', 'put', 'patch'].includes(action.action)) {
-						if (action.options.contenttype === undefined) {
-							action.options.contenttype = 'application/json'
-							updated = true
-						}
-					}
-				})
-
-				return updated
-			},
-
-			function v1_1_6(context, config) {
-				if (config.rejectUnauthorized === undefined) {
-					config.rejectUnauthorized = true
-					updated = true
-				}
-			},
-		]
+		return []
 	}
 
 	updateConfig(config) {
 		this.config = config
 
-		if (this.config.prefix !== undefined && this.config.prefix.length > 0) {
-			this.FIELD_URL.label = 'URI'
+		// Set default values for server IP and port
+		if (!this.config.server_ip) {
+			this.config.server_ip = '127.0.0.1'
+		}
+		if (!this.config.server_port) {
+			this.config.server_port = '1256'
+		}
+		this.debug('updateConfig', this.config)
+		
+		if (this.config.binary_path) {
+			this.status(this.STATE_OK)
 		} else {
-			this.FIELD_URL.label = 'URL'
+			this.status(this.STATE_ERROR, 'No binary path set for BUTT')
 		}
 
 		this.actions()
 	}
 
 	init() {
-		if (this.config.prefix !== undefined && this.config.prefix.length > 0) {
-			this.FIELD_URL.label = 'URI'
-		} else {
-			this.FIELD_URL.label = 'URL'
+		// Set default values for server IP and port
+		if (!this.config.server_ip) {
+			this.config.server_ip = '127.0.0.1'
 		}
+		if (!this.config.server_port) {
+			this.config.server_port = '1256'
+		}
+		this.debug('init', this.config)
 
-		this.status(this.STATE_OK)
+		if (this.config.binary_path) {
+			this.status(this.STATE_OK)
+		} else {
+			this.status(this.STATE_ERROR, 'No binary path set for BUTT')
+		}
 	}
 
 	// Return config fields for web config
@@ -83,12 +76,24 @@ class instance extends instance_skel {
 				width: 12,
 				label: 'Information',
 				value:
-					"<strong>PLEASE READ THIS!</strong> Generic modules is only for use with custom applications. If you use this module to control a device or software on the market that more than you are using, <strong>PLEASE let us know</strong> about this software, so we can make a proper module for it. If we already support this and you use this to trigger a feature our module doesnt support, please let us know. We want companion to be as easy as possible to use for anyone.<br /><br />Use the 'Base URL' field below to define a starting URL for the instance's commands: e.g. 'http://server.url/path/'.  <b>This field will be ignored if a command uses a full URL.</b>",
+					"BUTT should be installed and configured on the server.\nIt should also be configured to run the server component and listen on required network interfaces."
 			},
 			{
 				type: 'textinput',
-				id: 'prefix',
-				label: 'Base URL',
+				id: 'binary_path',
+				label: 'BUTT binary path on the server (either butt or butt-client binary)',
+				width: 12,
+			},
+			{
+				type: 'textinput',
+				id: 'server_ip',
+				label: 'IP address of the server (default: 127.0.0.1)',
+				width: 12,
+			},
+			{
+				type: 'textinput',
+				id: 'server_port',
+				label: 'Port of the server (default: 1256)',
 				width: 12,
 			}
 		]
