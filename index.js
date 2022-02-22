@@ -203,10 +203,25 @@ class instance extends instance_skel {
 			update_song_name: ['-u', `"${action.options.song_name}"`],
 			
 		}
-		// TODO toggle streaming and recording by querying status first
-		// toggle_streaming, toggle_recording
+		
+		var matchedArgs = []
+		if (action.action == 'toggle_streaming') {
+			if (this.status.connected == '1' || this.status.connecting == '1') {
+				matchedArgs = args.stop_streaming
+			} else {
+				matchedArgs = args.start_streaming
+			}
+		} else if (action.action == 'toggle_recording') {
+			if (this.status.recording == '1') {
+				matchedArgs = args.stop_recording
+			} else {
+				matchedArgs = args.start_recording
+			}
+		} else {
+			matchedArgs = args[action.action]
+		}
 
-		this.invoke_binary(args[action.action])
+		this.invoke_binary(matchedArgs)
 	}
 
 	startStatusTimer() {

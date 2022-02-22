@@ -8,14 +8,14 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 #### Streaming
 * Start streaming
 * Stop streaming
-* Toggle streaming (Coming very soon)
+* Toggle streaming
 * Set streaming signal threshold
 * Set streaming silence threshold
 
 #### Recording
 * Start recording
 * Stop recording
-* Toggle recording (Coming very soon)
+* Toggle recording
 * Split recording
 * Set recording signal threshold
 * Set recording silence threshold
