@@ -1,12 +1,11 @@
 {
-	"name": "generic-butt",
+	"name": "danielnoethen-butt",
 	"version": "1.0.0",
 	"api_version": "1.0.0",
 	"keywords": [
-		"Protocol",
-		"Generic"
+		"BUTT"
 	],
-	"manufacturer": "Generic",
+	"manufacturer": "danielnoethen",
 	"product": "BUTT Controller (broadcast using this tool)",
 	"shortname": "butt",
 	"main": "index.js",
@@ -15,14 +14,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-generic-butt.git"
+		"url": "git+https://github.com/bitfocus/companion-module-danielnoethen-butt.git"
 	},
 	"author": "Hossam Hammady <github@hammady.net>",
 	"contributors": [
 	],
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-generic-butt/issues"
+		"url": "https://github.com/bitfocus/companion-module-danielnoethen-butt/issues"
 	},
-	"homepage": "https://github.com/bitfocus/companion-module-generic-butt#readme"
+	"homepage": "https://github.com/bitfocus/companion-module-danielnoethen-butt#readme"
 }
