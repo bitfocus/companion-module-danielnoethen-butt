@@ -25,11 +25,12 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 
 ### Feedback
 
-* Streaming status (Coming very soon)
-* Recording status (Coming very soon)
-* Signal status (Coming very soon)
+* Streaming status
+* Recording status
+* Signal status
 
 ### Variables
 
-* Song title (Coming soon)
+* Streaming song title (Coming soon)
+* Recording file name (Coming soon)
 * Streaming/recording duration (Coming soon)

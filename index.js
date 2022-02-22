@@ -62,6 +62,9 @@ class instance extends instance_skel {
 		} else {
 			this.status(this.STATE_ERROR, 'No binary path set for BUTT')
 		}
+
+		this.initFeedbacks()
+		this.startStatusTimer()
 	}
 
 	// Return config fields for web config
@@ -105,6 +108,7 @@ class instance extends instance_skel {
 	destroy() {
 		this.debug('destroy')
 		this.system.removeListener('custom_variables_update', this.updateCustomVariables)
+		this.stopStatusTimer()
 	}
 
 	FIELD_THRESHOLD = {
@@ -169,16 +173,19 @@ class instance extends instance_skel {
 		})
 	}
 
-	invoke_binary = (args) => {
+	invoke_binary = (args, callback) => {
 		let cmd = `${this.config.binary_path} -a ${this.config.server_ip} -p ${this.config.server_port} ${args.join(' ')}`
 		this.debug('invoke_binary', cmd)
 
 		exec(cmd, (error, stdout, stderr) => {
 			if (error) {
 				this.log('error', `exec error: ${error}, sdterr: ${stderr}, stdout: ${stdout}`)
-				return;
+			} else {
+				this.log('debug', `exec success, stdout: ${stdout}`)
+				if (callback) {
+					callback(stdout)
+				}
 			}
-			this.log('info', `exec success, stdout: ${stdout}`)
 		});
 	}
 
@@ -200,6 +207,97 @@ class instance extends instance_skel {
 		// toggle_streaming, toggle_recording
 
 		this.invoke_binary(args[action.action])
+	}
+
+	startStatusTimer() {
+		this.statusTimer = setInterval(() => {
+			this.invoke_binary(['-S'], (output) => {
+				this.processStatus(output)
+				this.checkFeedbacks()
+			})
+		}, 1000)
+	}
+
+	processStatus(output) {
+		let lines = output.split('\n')
+		let status = {}
+		lines.forEach(line => {
+			let [key, value] = line.split(':')
+			if (key) {
+				if (value) {
+					status[key] = value.trim()
+				}
+				else {
+					status[key] = ''
+				}
+			}
+		})
+		this.status = status
+		this.debug('processStatus', status)
+	}
+
+	stopStatusTimer() {
+		clearInterval(this.statusTimer)
+	}
+
+	initFeedbacks() {
+		var feedbacks = {}
+		feedbacks['streaming_connected_status'] = {
+			type: 'boolean',
+			label: 'Change colors based on streaming connected status',
+			style: {
+				color: this.rgb(0, 0, 0),
+				bgcolor: this.rgb(0, 255, 0)
+			}
+		}
+		feedbacks['streaming_connecting_status'] = {
+			type: 'boolean',
+			label: 'Change colors based on streaming connecting status',
+			style: {
+				color: this.rgb(0, 0, 0),
+				bgcolor: this.rgb(255, 255, 0)
+			}
+		}
+		feedbacks['recording_status'] = {
+			type: 'boolean',
+			label: 'Change colors based on recording status',
+			style: {
+				color: this.rgb(0, 0, 0),
+				bgcolor: this.rgb(0, 255, 0)
+			}
+		}
+		feedbacks['signal_presence_status'] = {
+			type: 'boolean',
+			label: 'Change colors based on signal presence status',
+			style: {
+				color: this.rgb(0, 0, 0),
+				bgcolor: this.rgb(0, 255, 0)
+			}
+		}
+		feedbacks['signal_transition_status'] = {
+			type: 'boolean',
+			label: 'Change colors based on signal transition status',
+			style: {
+				color: this.rgb(0, 0, 0),
+				bgcolor: this.rgb(255, 255, 0)
+			}
+		}
+		this.setFeedbackDefinitions(feedbacks)
+	}
+
+	feedback(feedback) {
+		switch(feedback.type) {
+			case 'streaming_connected_status':
+				return this.status.connected == '1'
+			case 'streaming_connecting_status':
+				return this.status.connecting == '1'
+			case 'recording_status':
+				return this.status.recording == '1'
+			case 'signal_presence_status':
+				return this.status['signal present'] == '1'
+			case 'signal_transition_status':
+				return this.status['signal present'] == '0' && this.status['signal absent'] == '0'
+		}
 	}
 }
 exports = module.exports = instance
