@@ -173,17 +173,20 @@ class instance extends instance_skel {
 		})
 	}
 
-	invoke_binary = (args, callback) => {
+	invoke_binary = (args, success, failure) => {
 		let cmd = `${this.config.binary_path} -a ${this.config.server_ip} -p ${this.config.server_port} ${args.join(' ')}`
 		this.debug('invoke_binary', cmd)
 
 		exec(cmd, (error, stdout, stderr) => {
 			if (error) {
 				this.log('error', `exec error: ${error}, sdterr: ${stderr}, stdout: ${stdout}`)
+				if (failure) {
+					failure(stdout)
+				}
 			} else {
 				this.log('debug', `exec success, stdout: ${stdout}`)
-				if (callback) {
-					callback(stdout)
+				if (success) {
+					success(stdout)
 				}
 			}
 		});
@@ -227,7 +230,13 @@ class instance extends instance_skel {
 	startStatusTimer() {
 		this.statusTimer = setInterval(() => {
 			this.invoke_binary(['-S'], (output) => {
+				// success
 				this.processStatus(output)
+				this.checkFeedbacks()
+			}, (output) => {
+				// failure
+				this.status(this.STATE_ERROR, "Error while getting status, make sure BUTT server is running on the configured IP/port or restart it manually. Output: " + output)
+				this.processStatus('')
 				this.checkFeedbacks()
 			})
 		}, 1000)
@@ -297,6 +306,17 @@ class instance extends instance_skel {
 				bgcolor: this.rgb(255, 255, 0)
 			}
 		}
+		feedbacks['error_status'] = {
+			type: 'boolean',
+			label: 'Error status',
+			style: {
+				color: this.rgb(0, 0, 0),
+				bgcolor: this.rgb(255, 0, 0),
+				text: 'ERR',
+				size: 'auto',
+				alignment: 'center:center'
+			}
+		}
 		this.setFeedbackDefinitions(feedbacks)
 	}
 
@@ -312,6 +332,8 @@ class instance extends instance_skel {
 				return this.serverStatus['signal present'] == '1'
 			case 'signal_transition_status':
 				return this.serverStatus['signal present'] == '0' && this.serverStatus['signal absent'] == '0'
+			case 'error_status':
+				return Object.keys(this.serverStatus).length == 0 // activate if empty
 		}
 	}
 }

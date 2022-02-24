@@ -28,6 +28,7 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 * Streaming status
 * Recording status
 * Signal status
+* Error status
 
 ### Variables
 
