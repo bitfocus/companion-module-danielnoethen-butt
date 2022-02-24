@@ -206,13 +206,13 @@ class instance extends instance_skel {
 		
 		var matchedArgs = []
 		if (action.action == 'toggle_streaming') {
-			if (this.status.connected == '1' || this.status.connecting == '1') {
+			if (this.serverStatus.connected == '1' || this.serverStatus.connecting == '1') {
 				matchedArgs = args.stop_streaming
 			} else {
 				matchedArgs = args.start_streaming
 			}
 		} else if (action.action == 'toggle_recording') {
-			if (this.status.recording == '1') {
+			if (this.serverStatus.recording == '1') {
 				matchedArgs = args.stop_recording
 			} else {
 				matchedArgs = args.start_recording
@@ -247,7 +247,7 @@ class instance extends instance_skel {
 				}
 			}
 		})
-		this.status = status
+		this.serverStatus = status
 		this.debug('processStatus', status)
 	}
 
@@ -259,7 +259,7 @@ class instance extends instance_skel {
 		var feedbacks = {}
 		feedbacks['streaming_connected_status'] = {
 			type: 'boolean',
-			label: 'Change colors based on streaming connected status',
+			label: 'Streaming connected status',
 			style: {
 				color: this.rgb(0, 0, 0),
 				bgcolor: this.rgb(0, 255, 0)
@@ -267,7 +267,7 @@ class instance extends instance_skel {
 		}
 		feedbacks['streaming_connecting_status'] = {
 			type: 'boolean',
-			label: 'Change colors based on streaming connecting status',
+			label: 'Streaming connecting status',
 			style: {
 				color: this.rgb(0, 0, 0),
 				bgcolor: this.rgb(255, 255, 0)
@@ -275,7 +275,7 @@ class instance extends instance_skel {
 		}
 		feedbacks['recording_status'] = {
 			type: 'boolean',
-			label: 'Change colors based on recording status',
+			label: 'Recording status',
 			style: {
 				color: this.rgb(0, 0, 0),
 				bgcolor: this.rgb(0, 255, 0)
@@ -283,7 +283,7 @@ class instance extends instance_skel {
 		}
 		feedbacks['signal_presence_status'] = {
 			type: 'boolean',
-			label: 'Change colors based on signal presence status',
+			label: 'Signal presence status',
 			style: {
 				color: this.rgb(0, 0, 0),
 				bgcolor: this.rgb(0, 255, 0)
@@ -291,7 +291,7 @@ class instance extends instance_skel {
 		}
 		feedbacks['signal_transition_status'] = {
 			type: 'boolean',
-			label: 'Change colors based on signal transition status',
+			label: 'Signal transition status',
 			style: {
 				color: this.rgb(0, 0, 0),
 				bgcolor: this.rgb(255, 255, 0)
@@ -303,15 +303,15 @@ class instance extends instance_skel {
 	feedback(feedback) {
 		switch(feedback.type) {
 			case 'streaming_connected_status':
-				return this.status.connected == '1'
+				return this.serverStatus.connected == '1'
 			case 'streaming_connecting_status':
-				return this.status.connecting == '1'
+				return this.serverStatus.connecting == '1'
 			case 'recording_status':
-				return this.status.recording == '1'
+				return this.serverStatus.recording == '1'
 			case 'signal_presence_status':
-				return this.status['signal present'] == '1'
+				return this.serverStatus['signal present'] == '1'
 			case 'signal_transition_status':
-				return this.status['signal present'] == '0' && this.status['signal absent'] == '0'
+				return this.serverStatus['signal present'] == '0' && this.serverStatus['signal absent'] == '0'
 		}
 	}
 }
