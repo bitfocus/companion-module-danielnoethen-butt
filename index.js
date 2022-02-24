@@ -338,6 +338,17 @@ class instance extends instance_skel {
 				},
 			},
 		}
+		feedbacks['error_status'] = {
+			type: 'boolean',
+			label: 'Error status',
+			style: {
+				color: this.rgb(0, 0, 0),
+				bgcolor: this.rgb(255, 0, 0),
+				text: 'ERR',
+				size: 'auto',
+				alignment: 'center:center',
+			},
+		}
 		this.setFeedbackDefinitions(feedbacks)
 	}
 
