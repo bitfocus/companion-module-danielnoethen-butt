@@ -59,6 +59,7 @@ class instance extends instance_skel {
 
 	init() {
 		this.initActions()
+		this.initVariables()
 		this.initFeedbacks()
 		this.initPresets()
 		this.checkConfigAndStartTimer()
@@ -237,6 +238,7 @@ class instance extends instance_skel {
 	}
 
 	startStatusTimer() {
+		this.ticks = 0
 		this.statusTimer = setInterval(() => {
 			this.invoke_binary(
 				['-S'],
@@ -245,6 +247,7 @@ class instance extends instance_skel {
 					this.status(this.STATE_OK, output)
 					this.processStatus(output)
 					this.checkFeedbacks()
+					this.ticks++
 				},
 				(output) => {
 					// failure
@@ -274,6 +277,7 @@ class instance extends instance_skel {
 				}
 			}
 		})
+		this.setVariables(status)
 		this.serverStatus = status
 		this.debug('processStatus', status)
 	}
@@ -282,6 +286,85 @@ class instance extends instance_skel {
 		if (this.statusTimer) {
 			clearInterval(this.statusTimer)
 		}
+	}
+
+	initVariables() {
+		this.setVariableDefinitions([
+			{
+				label: 'Active song name being streamed',
+				name: 'stream_song_name',
+			},
+			{
+				label: 'Active song name being streamed (short)',
+				name: 'stream_song_name_short',
+			},
+			{
+				label: 'Active file name being recorded to',
+				name: 'recording_file_name',
+			},
+			{
+				label: 'Active file name being recorded to (short)',
+				name: 'recording_file_name_short',
+			},
+			{
+				label: 'Duration of the active stream (seconds)',
+				name: 'stream_duration',
+			},
+			{
+				label: 'Duration of the active stream (hh:mm:ss)',
+				name: 'stream_duration_hhmmss',
+			},
+			{
+				label: 'Duration of the active recording (seconds)',
+				name: 'recording_duration',
+			},
+			{
+				label: 'Duration of the active recording (hh:mm:ss)',
+				name: 'recording_duration_hhmmss',
+			},
+			{
+				label: 'Total amount of data sent for the active stream (kBytes)',
+				name: 'stream_data_sent',
+			},
+			{
+				label: 'Total amount of data saved for the active recording (kBytes)',
+				name: 'recording_data_saved',
+			},
+		])
+	}
+
+	extractShortString(str, maxLength) {
+		if (!str) {
+			return ''
+		}
+		if (str.length > maxLength) {
+			let start = this.ticks % str.length
+			return str.substring(start, start + maxLength)
+		}
+		return str
+	}
+
+	secondsToHhMmSs(seconds) {
+		if (!seconds) {
+			return '00:00:00'
+		}
+		let hh = Math.floor(seconds / 3600)
+		let mm = Math.floor((seconds % 3600) / 60)
+		let ss = Math.floor((seconds % 3600) % 60)
+		return `${hh}:${mm < 10 ? '0' + mm : mm}:${ss < 10 ? '0' + ss : ss}`
+	}
+
+	setVariables(status) {
+		this.setVariable('stream_song_name', status['song'])
+		this.setVariable('stream_song_name_short', this.extractShortString(status['song'], 9))
+		this.setVariable('recording_file_name', 'Not implemented')
+		this.setVariable('recording_file_name_short', this.extractShortString('Not implemented', 9))
+		this.setVariable('stream_duration', status['stream time'])
+		this.setVariable('stream_duration_hhmmss', this.secondsToHhMmSs(status['stream time']))
+		this.setVariable('recording_duration', status['record time'])
+		this.setVariable('recording_duration_hhmmss', this.secondsToHhMmSs(status['record time']))
+		this.setVariable('stream_data_sent', status['stream kBytes'])
+		this.setVariable('recording_data_saved', status['record kBytes'])
 	}
 
 	initFeedbacks() {
