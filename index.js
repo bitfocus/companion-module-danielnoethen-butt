@@ -1,5 +1,5 @@
 const instance_skel = require('../../instance_skel')
-const { exec } = require("child_process");
+const { exec } = require('child_process')
 
 class instance extends instance_skel {
 	/**
@@ -37,7 +37,7 @@ class instance extends instance_skel {
 			this.config.server_port = '1256'
 		}
 		this.debug('updateConfig', this.config)
-		
+
 		if (this.config.binary_path) {
 			this.status(this.STATE_OK)
 		} else {
@@ -76,14 +76,14 @@ class instance extends instance_skel {
 				width: 12,
 				label: 'Information',
 				value:
-					"BUTT should be installed and configured on the server.\nIt should also be configured to run the server component and listen on required network interfaces."
+					'BUTT should be installed and configured on the server.\nIt should also be configured to run the server component and listen on required network interfaces.',
 			},
 			{
 				type: 'textinput',
 				id: 'binary_path',
 				label: 'BUTT binary path on the server (either butt or butt-client binary)',
 				width: 12,
-				required: true
+				required: true,
 			},
 			{
 				type: 'textinput',
@@ -100,7 +100,7 @@ class instance extends instance_skel {
 				max: 65535,
 				default: 1256,
 				width: 12,
-			}
+			},
 		]
 	}
 
@@ -117,31 +117,31 @@ class instance extends instance_skel {
 		id: 'threshold',
 		min: 0,
 		max: 1000,
-		required: true
+		required: true,
 	}
 
 	actions() {
 		this.setActions({
 			start_streaming: {
-				label: 'Start streaming'
+				label: 'Start streaming',
 			},
 			stop_streaming: {
-				label: 'Stop streaming'
+				label: 'Stop streaming',
 			},
 			toggle_streaming: {
-				label: 'Toggle streaming'
+				label: 'Toggle streaming',
 			},
 			start_recording: {
-				label: 'Start recording'
+				label: 'Start recording',
 			},
 			stop_recording: {
-				label: 'Stop recording'
+				label: 'Stop recording',
 			},
 			toggle_recording: {
-				label: 'Toggle recording'
+				label: 'Toggle recording',
 			},
 			split_recording: {
-				label: 'Split recording'
+				label: 'Split recording',
 			},
 			set_streaming_signal_threshold: {
 				label: 'Set streaming signal threshold',
@@ -166,10 +166,10 @@ class instance extends instance_skel {
 						type: 'textinput',
 						label: 'Song name',
 						id: 'song_name',
-						required: true
-					}
-				]
-			}
+						required: true,
+					},
+				],
+			},
 		})
 	}
 
@@ -189,7 +189,7 @@ class instance extends instance_skel {
 					success(stdout)
 				}
 			}
-		});
+		})
 	}
 
 	action(action) {
@@ -204,9 +204,8 @@ class instance extends instance_skel {
 			set_recording_signal_threshold: ['-O', action.options.threshold],
 			set_recording_silence_threshold: ['-o', action.options.threshold],
 			update_song_name: ['-u', `"${action.options.song_name}"`],
-			
 		}
-		
+
 		var matchedArgs = []
 		if (action.action == 'toggle_streaming') {
 			if (this.serverStatus.connected == '1' || this.serverStatus.connecting == '1') {
@@ -229,29 +228,36 @@ class instance extends instance_skel {
 
 	startStatusTimer() {
 		this.statusTimer = setInterval(() => {
-			this.invoke_binary(['-S'], (output) => {
-				// success
-				this.processStatus(output)
-				this.checkFeedbacks()
-			}, (output) => {
-				// failure
-				this.status(this.STATE_ERROR, "Error while getting status, make sure BUTT server is running on the configured IP/port or restart it manually. Output: " + output)
-				this.processStatus('')
-				this.checkFeedbacks()
-			})
+			this.invoke_binary(
+				['-S'],
+				(output) => {
+					// success
+					this.processStatus(output)
+					this.checkFeedbacks()
+				},
+				(output) => {
+					// failure
+					this.status(
+						this.STATE_ERROR,
+						'Error while getting status, make sure BUTT server is running on the configured IP/port or restart it manually. Output: ' +
+							output
+					)
+					this.processStatus('')
+					this.checkFeedbacks()
+				}
+			)
 		}, 1000)
 	}
 
 	processStatus(output) {
 		let lines = output.split('\n')
 		let status = {}
-		lines.forEach(line => {
+		lines.forEach((line) => {
 			let [key, value] = line.split(':')
 			if (key) {
 				if (value) {
 					status[key] = value.trim()
-				}
-				else {
+				} else {
 					status[key] = ''
 				}
 			}
@@ -271,40 +277,40 @@ class instance extends instance_skel {
 			label: 'Streaming connected status',
 			style: {
 				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(0, 255, 0)
-			}
+				bgcolor: this.rgb(0, 255, 0),
+			},
 		}
 		feedbacks['streaming_connecting_status'] = {
 			type: 'boolean',
 			label: 'Streaming connecting status',
 			style: {
 				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(255, 255, 0)
-			}
+				bgcolor: this.rgb(255, 255, 0),
+			},
 		}
 		feedbacks['recording_status'] = {
 			type: 'boolean',
 			label: 'Recording status',
 			style: {
 				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(0, 255, 0)
-			}
+				bgcolor: this.rgb(0, 255, 0),
+			},
 		}
 		feedbacks['signal_presence_status'] = {
 			type: 'boolean',
 			label: 'Signal presence status',
 			style: {
 				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(0, 255, 0)
-			}
+				bgcolor: this.rgb(0, 255, 0),
+			},
 		}
 		feedbacks['signal_transition_status'] = {
 			type: 'boolean',
 			label: 'Signal transition status',
 			style: {
 				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(255, 255, 0)
-			}
+				bgcolor: this.rgb(255, 255, 0),
+			},
 		}
 		feedbacks['error_status'] = {
 			type: 'boolean',
@@ -314,14 +320,14 @@ class instance extends instance_skel {
 				bgcolor: this.rgb(255, 0, 0),
 				text: 'ERR',
 				size: 'auto',
-				alignment: 'center:center'
-			}
+				alignment: 'center:center',
+			},
 		}
 		this.setFeedbackDefinitions(feedbacks)
 	}
 
 	feedback(feedback) {
-		switch(feedback.type) {
+		switch (feedback.type) {
 			case 'streaming_connected_status':
 				return this.serverStatus.connected == '1'
 			case 'streaming_connecting_status':
