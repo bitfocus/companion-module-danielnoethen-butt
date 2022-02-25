@@ -45,6 +45,7 @@ class instance extends instance_skel {
 		}
 
 		this.actions()
+		this.initPresets()
 	}
 
 	init() {
@@ -64,6 +65,7 @@ class instance extends instance_skel {
 		}
 
 		this.initFeedbacks()
+		this.initPresets()
 		this.startStatusTimer()
 	}
 
@@ -341,6 +343,138 @@ class instance extends instance_skel {
 			case 'error_status':
 				return Object.keys(this.serverStatus).length == 0 // activate if empty
 		}
+	}
+
+	initPresets() {
+		var presets = [
+			{
+				category: 'Commands',
+				label: 'Toggle streaming',
+				bank: {
+					style: 'text',
+					text: 'Stream',
+					size: '18',
+					color: this.rgb(255, 255, 255),
+					bgcolor: this.rgb(0, 0, 0),
+				},
+				actions: [
+					{
+						action: 'set_streaming_signal_threshold',
+						delay: 0,
+						options: {
+							threshold: 0,
+						},
+					},
+					{
+						action: 'set_streaming_silence_threshold',
+						delay: 500,
+						options: {
+							threshold: 0,
+						},
+					},
+					{
+						action: 'toggle_streaming',
+						delay: 1500,
+						options: {},
+					},
+				],
+				feedbacks: [
+					{
+						type: 'streaming_connecting_status',
+						style: {
+							color: this.rgb(0, 0, 0),
+							bgcolor: this.rgb(255, 255, 0),
+						},
+					},
+					{
+						type: 'streaming_connected_status',
+						style: {
+							color: this.rgb(0, 0, 0),
+							bgcolor: this.rgb(0, 255, 0),
+						},
+					},
+				],
+			},
+			{
+				category: 'Commands',
+				// label: 'Toggle recording',
+				bank: {
+					style: 'text',
+					text: 'Record',
+					size: '18',
+					color: this.rgb(255, 255, 255),
+					bgcolor: this.rgb(0, 0, 0),
+				},
+				actions: [
+					{
+						action: 'set_recording_signal_threshold',
+						delay: 0,
+						options: {
+							threshold: 0,
+						},
+					},
+					{
+						action: 'set_recording_silence_threshold',
+						delay: 500,
+						options: {
+							threshold: 0,
+						},
+					},
+					{
+						action: 'toggle_recording',
+						delay: 1500,
+						options: {},
+					},
+				],
+				feedbacks: [
+					{
+						type: 'recording_status',
+						style: {
+							color: this.rgb(0, 0, 0),
+							bgcolor: this.rgb(0, 255, 0),
+						},
+					},
+				],
+			},
+			{
+				category: 'Commands',
+				label: 'Toggle signal presence',
+				bank: {
+					style: 'text',
+					text: 'Signal',
+					size: '18',
+					color: this.rgb(255, 255, 255),
+					bgcolor: this.rgb(0, 0, 0),
+				},
+				feedbacks: [
+					{
+						type: 'signal_transition_status',
+						style: {
+							color: this.rgb(0, 0, 0),
+							bgcolor: this.rgb(255, 255, 0),
+						},
+					},
+					{
+						type: 'signal_presence_status',
+						style: {
+							color: this.rgb(0, 0, 0),
+							bgcolor: this.rgb(0, 255, 0),
+						},
+					},
+					{
+						type: 'error_status',
+						style: {
+							color: this.rgb(0, 0, 0),
+							bgcolor: this.rgb(255, 0, 0),
+							text: 'ERR',
+							size: 'auto',
+							alignment: 'center:center',
+						},
+					},
+				],
+			},
+		]
+		this.setPresetDefinitions(presets)
 	}
 }
 exports = module.exports = instance

@@ -33,6 +33,11 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 - Signal status
 - Error status
 
+### Presets
+
+- Streaming toggle button with feedback
+- Recording toggle button with feedback
+- Button with both signal status and error feedback
 ### Variables
 
 - Streaming song title (Coming soon)
