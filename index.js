@@ -73,7 +73,10 @@ class instance extends instance_skel {
 				width: 12,
 				label: 'Information',
 				value:
-					'BUTT should be installed and configured on the server.\nIt should also be configured to run the server component and listen on required network interfaces.',
+					'BUTT should be installed and configured on the server. ' +
+					'It should also be configured to run the server component and ' +
+					'listen on all network interfaces (command line argument -A). ' +
+					'Minimum supported version is 0.1.33.',
 			},
 			{
 				type: 'textinput',
