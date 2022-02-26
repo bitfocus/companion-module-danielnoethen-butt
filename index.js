@@ -17,13 +17,10 @@ class instance extends instance_skel {
 		this.customVariables = {}
 		system.emit('custom_variables_get', this.updateCustomVariables)
 		system.on('custom_variables_update', this.updateCustomVariables)
-
-		this.actions() // export actions
 	}
 
 	updateCustomVariables = (variables) => {
 		this.customVariables = variables
-		this.actions()
 	}
 
 	updateConfig(config) {
@@ -43,27 +40,10 @@ class instance extends instance_skel {
 		} else {
 			this.status(this.STATE_ERROR, 'No binary path set for BUTT')
 		}
-
-		this.actions()
-		this.initPresets()
 	}
 
 	init() {
-		// Set default values for server IP and port
-		if (!this.config.server_ip) {
-			this.config.server_ip = '127.0.0.1'
-		}
-		if (!this.config.server_port) {
-			this.config.server_port = '1256'
-		}
-		this.debug('init', this.config)
-
-		if (this.config.binary_path) {
-			this.status(this.STATE_OK)
-		} else {
-			this.status(this.STATE_ERROR, 'No binary path set for BUTT')
-		}
-
+		this.initActions()
 		this.initFeedbacks()
 		this.initPresets()
 		this.startStatusTimer()
@@ -122,8 +102,8 @@ class instance extends instance_skel {
 		required: true,
 	}
 
-	actions() {
-		this.setActions({
+	initActions() {
+		let actions = {
 			start_streaming: {
 				label: 'Start streaming',
 			},
@@ -172,7 +152,8 @@ class instance extends instance_skel {
 					},
 				],
 			},
-		})
+		}
+		this.setActions(actions)
 	}
 
 	invoke_binary = (args, success, failure) => {
@@ -186,7 +167,7 @@ class instance extends instance_skel {
 					failure(stdout)
 				}
 			} else {
-				this.log('debug', `exec success, stdout: ${stdout}`)
+				this.debug(`exec success, stdout: ${stdout}`)
 				if (success) {
 					success(stdout)
 				}
@@ -273,56 +254,57 @@ class instance extends instance_skel {
 	}
 
 	initFeedbacks() {
-		var feedbacks = {}
-		feedbacks['streaming_connected_status'] = {
-			type: 'boolean',
-			label: 'Streaming connected status',
-			style: {
-				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(0, 255, 0),
+		let feedbacks = {
+			streaming_connected_status: {
+				type: 'boolean',
+				label: 'Streaming connected status',
+				style: {
+					color: this.rgb(0, 0, 0),
+					bgcolor: this.rgb(0, 255, 0),
+				},
 			},
-		}
-		feedbacks['streaming_connecting_status'] = {
-			type: 'boolean',
-			label: 'Streaming connecting status',
-			style: {
-				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(255, 255, 0),
+			streaming_connecting_status: {
+				type: 'boolean',
+				label: 'Streaming connecting status',
+				style: {
+					color: this.rgb(0, 0, 0),
+					bgcolor: this.rgb(255, 255, 0),
+				},
 			},
-		}
-		feedbacks['recording_status'] = {
-			type: 'boolean',
-			label: 'Recording status',
-			style: {
-				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(0, 255, 0),
+			recording_status: {
+				type: 'boolean',
+				label: 'Recording status',
+				style: {
+					color: this.rgb(0, 0, 0),
+					bgcolor: this.rgb(0, 255, 0),
+				},
 			},
-		}
-		feedbacks['signal_presence_status'] = {
-			type: 'boolean',
-			label: 'Signal presence status',
-			style: {
-				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(0, 255, 0),
+			signal_presence_status: {
+				type: 'boolean',
+				label: 'Signal presence status',
+				style: {
+					color: this.rgb(0, 0, 0),
+					bgcolor: this.rgb(0, 255, 0),
+				},
 			},
-		}
-		feedbacks['signal_transition_status'] = {
-			type: 'boolean',
-			label: 'Signal transition status',
-			style: {
-				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(255, 255, 0),
+			signal_transition_status: {
+				type: 'boolean',
+				label: 'Signal transition status',
+				style: {
+					color: this.rgb(0, 0, 0),
+					bgcolor: this.rgb(255, 255, 0),
+				},
 			},
-		}
-		feedbacks['error_status'] = {
-			type: 'boolean',
-			label: 'Error status',
-			style: {
-				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(255, 0, 0),
-				text: 'ERR',
-				size: 'auto',
-				alignment: 'center:center',
+			error_status: {
+				type: 'boolean',
+				label: 'Error status',
+				style: {
+					color: this.rgb(0, 0, 0),
+					bgcolor: this.rgb(255, 0, 0),
+					text: 'ERR',
+					size: 'auto',
+					alignment: 'center:center',
+				},
 			},
 		}
 		this.setFeedbackDefinitions(feedbacks)
@@ -346,7 +328,7 @@ class instance extends instance_skel {
 	}
 
 	initPresets() {
-		var presets = [
+		let presets = [
 			{
 				category: 'Commands',
 				label: 'Toggle streaming',
@@ -397,7 +379,7 @@ class instance extends instance_skel {
 			},
 			{
 				category: 'Commands',
-				// label: 'Toggle recording',
+				label: 'Toggle recording',
 				bank: {
 					style: 'text',
 					text: 'Record',
