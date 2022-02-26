@@ -1,5 +1,6 @@
 const instance_skel = require('../../instance_skel')
 const { exec } = require('child_process')
+const fs = require('fs')
 
 class instance extends instance_skel {
 	/**
@@ -25,18 +26,32 @@ class instance extends instance_skel {
 
 	updateConfig(config) {
 		this.config = config
+		this.checkConfigAndStartTimer()
+	}
 
+	checkConfigAndStartTimer() {
 		// Set default values for server IP and port
 		if (!this.config.server_ip) {
 			this.config.server_ip = '127.0.0.1'
 		}
 		if (!this.config.server_port) {
-			this.config.server_port = '1256'
+			this.config.server_port = 1256
 		}
-		this.debug('updateConfig', this.config)
+		if (!this.config.timer_interval) {
+			this.config.timer_interval = 1000
+		}
+		this.debug('config', this.config)
 
+		this.stopStatusTimer()
 		if (this.config.binary_path) {
-			this.status(this.STATE_OK)
+			fs.access(this.config.binary_path, fs.F_OK, (err) => {
+				if (err) {
+					this.status(this.STATE_ERROR, 'No BUTT binary found in the configured binary path')
+				} else {
+					this.status(this.STATE_OK, 'Configured binary path is valid')
+					this.startStatusTimer()
+				}
+			})
 		} else {
 			this.status(this.STATE_ERROR, 'No binary path set for BUTT')
 		}
@@ -46,7 +61,7 @@ class instance extends instance_skel {
 		this.initActions()
 		this.initFeedbacks()
 		this.initPresets()
-		this.startStatusTimer()
+		this.checkConfigAndStartTimer()
 	}
 
 	// Return config fields for web config
@@ -81,6 +96,15 @@ class instance extends instance_skel {
 				min: 1,
 				max: 65535,
 				default: 1256,
+				width: 12,
+			},
+			{
+				type: 'number',
+				id: 'timer_interval',
+				label: '[Advanced] Status timer interval (default: 1000ms)',
+				min: 100,
+				max: 60000,
+				default: 1000,
 				width: 12,
 			},
 		]
@@ -215,6 +239,7 @@ class instance extends instance_skel {
 				['-S'],
 				(output) => {
 					// success
+					this.status(this.STATE_OK, output)
 					this.processStatus(output)
 					this.checkFeedbacks()
 				},
@@ -229,7 +254,8 @@ class instance extends instance_skel {
 					this.checkFeedbacks()
 				}
 			)
-		}, 1000)
+		}, this.config.timer_interval)
+		this.log('debug', 'BUTT status timer started')
 	}
 
 	processStatus(output) {
@@ -250,7 +276,9 @@ class instance extends instance_skel {
 	}
 
 	stopStatusTimer() {
-		clearInterval(this.statusTimer)
+		if (this.statusTimer) {
+			clearInterval(this.statusTimer)
+		}
 	}
 
 	initFeedbacks() {
