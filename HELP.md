@@ -39,9 +39,12 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 - Recording toggle button with feedback
 - Button with both signal status and error feedback
 
-### Variables
+### Variables (experimental)
 
 - Streaming song title
 - Recording file name (Coming soon)
 - Streaming/recording duration
 - Streaming/recording bytes sent/saved
+
+These variables are currently not available in the latest released version of BUTT.
+They will only work if you have an unofficial edge version of BUTT.

@@ -291,7 +291,7 @@ class instance extends instance_skel {
 				name: 'stream_song_name',
 			},
 			{
-				label: 'Active song name being streamed (short)',
+				label: 'Short active song name being streamed',
 				name: 'stream_song_name_short',
 			},
 			{
@@ -299,7 +299,7 @@ class instance extends instance_skel {
 				name: 'recording_file_name',
 			},
 			{
-				label: 'Active file name being recorded to (short)',
+				label: 'Short active file name being recorded to',
 				name: 'recording_file_name_short',
 			},
 			{
