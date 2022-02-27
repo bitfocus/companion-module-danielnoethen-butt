@@ -38,8 +38,10 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 - Streaming toggle button with feedback
 - Recording toggle button with feedback
 - Button with both signal status and error feedback
+
 ### Variables
 
-- Streaming song title (Coming soon)
+- Streaming song title
 - Recording file name (Coming soon)
-- Streaming/recording duration (Coming soon)
+- Streaming/recording duration
+- Streaming/recording bytes sent/saved

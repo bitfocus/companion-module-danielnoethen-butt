@@ -270,11 +270,7 @@ class instance extends instance_skel {
 		lines.forEach((line) => {
 			let [key, value] = line.split(':')
 			if (key) {
-				if (value) {
-					status[key] = value.trim()
-				} else {
-					status[key] = ''
-				}
+				status[key] = value ? value.trim() : ''
 			}
 		})
 		this.setVariables(status)
