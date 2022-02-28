@@ -380,65 +380,77 @@ class instance extends instance_skel {
 		this.setVariable('recording_data_saved', this.kiloBytesToHumanReadable(status['record kBytes']))
 	}
 
+	STREAM_CONNECTING_STYLE = {
+		color: this.rgb(0, 0, 0),
+		bgcolor: this.rgb(255, 255, 0),
+		text: 'Conn...',
+		size: '18',
+	}
+
+	STREAM_CONNECTED_STYLE = {
+		color: this.rgb(0, 0, 0),
+		bgcolor: this.rgb(0, 255, 0),
+		text: '$(butt:stream_duration_hhmmss)\\n$(butt:stream_song_name_short)',
+		size: '18',
+		alignment: 'left:center',
+	}
+
+	RECORDING_STYLE = {
+		color: this.rgb(0, 0, 0),
+		bgcolor: this.rgb(0, 255, 0),
+		text: '$(butt:recording_duration_hhmmss)\\n$(butt:recording_data_saved)',
+		size: '18',
+	}
+
+	SIGNAL_TRANSITION_STYLE = {
+		color: this.rgb(0, 0, 0),
+		bgcolor: this.rgb(255, 255, 0),
+	}
+
+	SIGNAL_PRESENCE_STYLE = {
+		color: this.rgb(0, 0, 0),
+		bgcolor: this.rgb(0, 255, 0),
+	}
+
+	ERROR_STYLE = {
+		color: this.rgb(0, 0, 0),
+		bgcolor: this.rgb(255, 0, 0),
+		text: 'ERR',
+		size: 'auto',
+		alignment: 'center:center',
+	}
+
 	initFeedbacks() {
 		let feedbacks = {
 			streaming_connecting_status: {
 				type: 'boolean',
 				label: 'Streaming connecting status',
-				style: {
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(255, 255, 0),
-					text: 'Conn...',
-					size: '18',
-				},
+				style: this.STREAM_CONNECTING_STYLE,
 			},
 			streaming_connected_status: {
 				type: 'boolean',
 				label: 'Streaming connected status',
-				style: {
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(0, 255, 0),
-					text: '$(butt:stream_duration_hhmmss)\\n$(butt:stream_song_name_short)',
-					size: '18',
-					alignment: 'left:center',
-				},
+				style: this.STREAM_CONNECTED_STYLE,
 			},
 			recording_status: {
 				type: 'boolean',
 				label: 'Recording status',
-				style: {
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(0, 255, 0),
-					text: '$(butt:recording_duration_hhmmss)\\n$(butt:recording_data_saved)',
-					size: '18',
-				},
+				style: this.RECORDING_STYLE,
 			},
 			signal_transition_status: {
 				type: 'boolean',
 				label: 'Signal transition status',
-				style: {
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(255, 255, 0),
-				},
+				style: this.SIGNAL_TRANSITION_STYLE,
 			},
 			signal_presence_status: {
 				type: 'boolean',
 				label: 'Signal presence status',
-				style: {
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(0, 255, 0),
-				},
+				style: this.SIGNAL_PRESENCE_STYLE,
 			},
 			error_status: {
 				type: 'boolean',
 				label: 'Error status',
-				style: {
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(255, 0, 0),
-					text: 'ERR',
-					size: 'auto',
-					alignment: 'center:center',
-				},
+				style: this.ERROR_STYLE,
 			},
 		}
 		this.setFeedbackDefinitions(feedbacks)
@@ -497,22 +509,11 @@ class instance extends instance_skel {
 				feedbacks: [
 					{
 						type: 'streaming_connecting_status',
-						style: {
-							color: this.rgb(0, 0, 0),
-							bgcolor: this.rgb(255, 255, 0),
-							text: 'Conn...',
-							size: '18',
-						},
+						style: this.STREAM_CONNECTING_STYLE,
 					},
 					{
 						type: 'streaming_connected_status',
-						style: {
-							color: this.rgb(0, 0, 0),
-							bgcolor: this.rgb(0, 255, 0),
-							text: '$(butt:stream_duration_hhmmss)\\n$(butt:stream_song_name_short)',
-							size: '18',
-							alignment: 'left:center',
-						},
+						style: this.STREAM_CONNECTED_STYLE,
 					},
 				],
 			},
@@ -550,12 +551,7 @@ class instance extends instance_skel {
 				feedbacks: [
 					{
 						type: 'recording_status',
-						style: {
-							color: this.rgb(0, 0, 0),
-							bgcolor: this.rgb(0, 255, 0),
-							text: '$(butt:recording_duration_hhmmss)\\n$(butt:recording_data_saved)',
-							size: '18',
-						},
+						style: this.RECORDING_STYLE,
 					},
 				],
 			},
@@ -572,27 +568,15 @@ class instance extends instance_skel {
 				feedbacks: [
 					{
 						type: 'signal_transition_status',
-						style: {
-							color: this.rgb(0, 0, 0),
-							bgcolor: this.rgb(255, 255, 0),
-						},
+						style: this.SIGNAL_TRANSITION_STYLE,
 					},
 					{
 						type: 'signal_presence_status',
-						style: {
-							color: this.rgb(0, 0, 0),
-							bgcolor: this.rgb(0, 255, 0),
-						},
+						style: this.SIGNAL_PRESENCE_STYLE,
 					},
 					{
 						type: 'error_status',
-						style: {
-							color: this.rgb(0, 0, 0),
-							bgcolor: this.rgb(255, 0, 0),
-							text: 'ERR',
-							size: 'auto',
-							alignment: 'center:center',
-						},
+						style: this.ERROR_STYLE,
 					},
 				],
 			},
