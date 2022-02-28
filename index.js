@@ -291,16 +291,8 @@ class instance extends instance_skel {
 				name: 'stream_song_name',
 			},
 			{
-				label: 'Short active song name being streamed',
+				label: 'Short scrolling active song name being streamed',
 				name: 'stream_song_name_short',
-			},
-			{
-				label: 'Active file name being recorded to',
-				name: 'recording_file_name',
-			},
-			{
-				label: 'Short active file name being recorded to',
-				name: 'recording_file_name_short',
 			},
 			{
 				label: 'Duration of the active stream (seconds)',
@@ -311,6 +303,18 @@ class instance extends instance_skel {
 				name: 'stream_duration_hhmmss',
 			},
 			{
+				label: 'Total amount of data sent for the active stream',
+				name: 'stream_data_sent',
+			},
+			{
+				label: 'Active file name being recorded to',
+				name: 'recording_file_name',
+			},
+			{
+				label: 'Short scrolling active file name being recorded to',
+				name: 'recording_file_name_short',
+			},
+			{
 				label: 'Duration of the active recording (seconds)',
 				name: 'recording_duration',
 			},
@@ -319,11 +323,7 @@ class instance extends instance_skel {
 				name: 'recording_duration_hhmmss',
 			},
 			{
-				label: 'Total amount of data sent for the active stream (kBytes)',
-				name: 'stream_data_sent',
-			},
-			{
-				label: 'Total amount of data saved for the active recording (kBytes)',
+				label: 'Total amount of data saved for the active recording',
 				name: 'recording_data_saved',
 			},
 		])
@@ -333,21 +333,38 @@ class instance extends instance_skel {
 		if (!str) {
 			return ''
 		}
-		if (str.length > maxLength) {
-			let start = this.ticks % str.length
-			return str.substring(start, start + maxLength)
+		if (str.length <= maxLength) {
+			return str
 		}
-		return str
+		let start = this.ticks % str.length
+		return str.substring(start, start + maxLength)
 	}
 
 	secondsToHhMmSs(seconds) {
 		if (!seconds) {
 			return '00:00:00'
 		}
-		let hh = Math.floor(seconds / 3600)
-		let mm = Math.floor((seconds % 3600) / 60)
-		let ss = Math.floor((seconds % 3600) % 60)
-		return `${hh}:${mm < 10 ? '0' + mm : mm}:${ss < 10 ? '0' + ss : ss}`
+		let pad = (num) => {
+			return ('0' + num).slice(-2)
+		}
+		let hh = pad(Math.floor(seconds / 3600))
+		let mm = pad(Math.floor((seconds % 3600) / 60))
+		let ss = pad(Math.floor((seconds % 3600) % 60))
+		return `${hh}:${mm}:${ss}`
+	}
+
+	kiloBytesToHumanReadable(kiloBytes) {
+		if (!kiloBytes) {
+			return '0K'
+		}
+		kiloBytes = parseInt(kiloBytes)
+		let units = ['K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+		let i = 0
+		while (kiloBytes >= 1024) {
+			kiloBytes /= 1024
+			i++
+		}
+		return `${kiloBytes.toFixed(i ? 2 : 0)}${units[i]}`
 	}
 
 	setVariables(status) {
@@ -359,26 +376,31 @@ class instance extends instance_skel {
 		this.setVariable('stream_duration_hhmmss', this.secondsToHhMmSs(status['stream time']))
 		this.setVariable('recording_duration', status['record time'])
 		this.setVariable('recording_duration_hhmmss', this.secondsToHhMmSs(status['record time']))
-		this.setVariable('stream_data_sent', status['stream kBytes'])
-		this.setVariable('recording_data_saved', status['record kBytes'])
+		this.setVariable('stream_data_sent', this.kiloBytesToHumanReadable(status['stream kBytes']))
+		this.setVariable('recording_data_saved', this.kiloBytesToHumanReadable(status['record kBytes']))
 	}
 
 	initFeedbacks() {
 		let feedbacks = {
-			streaming_connected_status: {
-				type: 'boolean',
-				label: 'Streaming connected status',
-				style: {
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(0, 255, 0),
-				},
-			},
 			streaming_connecting_status: {
 				type: 'boolean',
 				label: 'Streaming connecting status',
 				style: {
 					color: this.rgb(0, 0, 0),
 					bgcolor: this.rgb(255, 255, 0),
+					text: 'Conn...',
+					size: '18',
+				},
+			},
+			streaming_connected_status: {
+				type: 'boolean',
+				label: 'Streaming connected status',
+				style: {
+					color: this.rgb(0, 0, 0),
+					bgcolor: this.rgb(0, 255, 0),
+					text: '$(butt:stream_duration_hhmmss)\\n$(butt:stream_song_name_short)',
+					size: '18',
+					alignment: 'left:center',
 				},
 			},
 			recording_status: {
@@ -387,14 +409,8 @@ class instance extends instance_skel {
 				style: {
 					color: this.rgb(0, 0, 0),
 					bgcolor: this.rgb(0, 255, 0),
-				},
-			},
-			signal_presence_status: {
-				type: 'boolean',
-				label: 'Signal presence status',
-				style: {
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(0, 255, 0),
+					text: '$(butt:recording_duration_hhmmss)\\n$(butt:recording_data_saved)',
+					size: '18',
 				},
 			},
 			signal_transition_status: {
@@ -403,6 +419,14 @@ class instance extends instance_skel {
 				style: {
 					color: this.rgb(0, 0, 0),
 					bgcolor: this.rgb(255, 255, 0),
+				},
+			},
+			signal_presence_status: {
+				type: 'boolean',
+				label: 'Signal presence status',
+				style: {
+					color: this.rgb(0, 0, 0),
+					bgcolor: this.rgb(0, 255, 0),
 				},
 			},
 			error_status: {
@@ -415,17 +439,6 @@ class instance extends instance_skel {
 					size: 'auto',
 					alignment: 'center:center',
 				},
-			},
-		}
-		feedbacks['error_status'] = {
-			type: 'boolean',
-			label: 'Error status',
-			style: {
-				color: this.rgb(0, 0, 0),
-				bgcolor: this.rgb(255, 0, 0),
-				text: 'ERR',
-				size: 'auto',
-				alignment: 'center:center',
 			},
 		}
 		this.setFeedbackDefinitions(feedbacks)
@@ -455,7 +468,7 @@ class instance extends instance_skel {
 				label: 'Toggle streaming',
 				bank: {
 					style: 'text',
-					text: 'Stream',
+					text: 'Stream Radio',
 					size: '18',
 					color: this.rgb(255, 255, 255),
 					bgcolor: this.rgb(0, 0, 0),
@@ -487,6 +500,8 @@ class instance extends instance_skel {
 						style: {
 							color: this.rgb(0, 0, 0),
 							bgcolor: this.rgb(255, 255, 0),
+							text: 'Conn...',
+							size: '18',
 						},
 					},
 					{
@@ -494,6 +509,9 @@ class instance extends instance_skel {
 						style: {
 							color: this.rgb(0, 0, 0),
 							bgcolor: this.rgb(0, 255, 0),
+							text: '$(butt:stream_duration_hhmmss)\\n$(butt:stream_song_name_short)',
+							size: '18',
+							alignment: 'left:center',
 						},
 					},
 				],
@@ -503,7 +521,7 @@ class instance extends instance_skel {
 				label: 'Toggle recording',
 				bank: {
 					style: 'text',
-					text: 'Record',
+					text: 'Record Radio',
 					size: '18',
 					color: this.rgb(255, 255, 255),
 					bgcolor: this.rgb(0, 0, 0),
@@ -535,6 +553,8 @@ class instance extends instance_skel {
 						style: {
 							color: this.rgb(0, 0, 0),
 							bgcolor: this.rgb(0, 255, 0),
+							text: '$(butt:recording_duration_hhmmss)\\n$(butt:recording_data_saved)',
+							size: '18',
 						},
 					},
 				],
@@ -544,7 +564,7 @@ class instance extends instance_skel {
 				label: 'Toggle signal presence',
 				bank: {
 					style: 'text',
-					text: 'Signal',
+					text: 'Radio Signal',
 					size: '18',
 					color: this.rgb(255, 255, 255),
 					bgcolor: this.rgb(0, 0, 0),
