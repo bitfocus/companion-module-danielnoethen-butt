@@ -42,8 +42,10 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 ### Variables (experimental)
 
 - Streaming song title
+- Recording path and filename
 - Streaming/recording duration
 - Streaming/recording bytes sent/saved
+- Volume levels (left/right)
 
 These variables are currently not available in the latest released version of BUTT
 (0.1.33 at the time of writing).

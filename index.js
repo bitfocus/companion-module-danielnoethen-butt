@@ -307,6 +307,14 @@ class instance extends instance_skel {
 				name: 'stream_data_sent',
 			},
 			{
+				label: 'Absolute path for the recording directory',
+				name: 'recording_file_path',
+			},
+			{
+				label: 'Short scrolling absolute path for the recording directory',
+				name: 'recording_file_path_short',
+			},
+			{
 				label: 'Active file name being recorded to',
 				name: 'recording_file_name',
 			},
@@ -325,6 +333,14 @@ class instance extends instance_skel {
 			{
 				label: 'Total amount of data saved for the active recording',
 				name: 'recording_data_saved',
+			},
+			{
+				label: 'Volume level in decibels (left)',
+				name: 'volume_left',
+			},
+			{
+				label: 'Volume level in decibels (right)',
+				name: 'volume_right',
 			},
 		])
 	}
@@ -367,17 +383,32 @@ class instance extends instance_skel {
 		return `${kiloBytes.toFixed(i ? 2 : 0)}${units[i]}`
 	}
 
+	splitPathToDirectoryAndFileName(path) {
+		if (!path) {
+			return ['', '']
+		}
+		let parts = path.split('/')
+		let fileName = parts.pop()
+		let directory = parts.join('/')
+		return [directory, fileName]
+	}
+
 	setVariables(status) {
 		this.setVariable('stream_song_name', status['song'])
 		this.setVariable('stream_song_name_short', this.extractShortString(status['song'], 9))
-		this.setVariable('recording_file_name', 'Not implemented')
-		this.setVariable('recording_file_name_short', this.extractShortString('Not implemented', 9))
+		let pathParts = this.splitPathToDirectoryAndFileName(status['record path'])
+		this.setVariable('recording_file_path', pathParts[0])
+		this.setVariable('recording_file_path_short', this.extractShortString(pathParts[0], 9))
+		this.setVariable('recording_file_name', pathParts[1])
+		this.setVariable('recording_file_name_short', this.extractShortString(pathParts[1], 9))
 		this.setVariable('stream_duration', status['stream seconds'])
 		this.setVariable('stream_duration_hhmmss', this.secondsToHhMmSs(status['stream seconds']))
 		this.setVariable('recording_duration', status['record seconds'])
 		this.setVariable('recording_duration_hhmmss', this.secondsToHhMmSs(status['record seconds']))
 		this.setVariable('stream_data_sent', this.kiloBytesToHumanReadable(status['stream kBytes']))
 		this.setVariable('recording_data_saved', this.kiloBytesToHumanReadable(status['record kBytes']))
+		this.setVariable('volume_left', status['volume left'])
+		this.setVariable('volume_right', status['volume right'])
 	}
 
 	STREAM_CONNECTING_STYLE = {
