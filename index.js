@@ -40,6 +40,9 @@ class instance extends instance_skel {
 		if (!this.config.timer_interval) {
 			this.config.timer_interval = 1000
 		}
+		if (!this.config.scrolling_text_max_length) {
+			this.config.scrolling_text_max_length = 9
+		}
 		this.debug('config', this.config)
 
 		this.stopStatusTimer()
@@ -104,9 +107,18 @@ class instance extends instance_skel {
 			},
 			{
 				type: 'number',
+				id: 'scrolling_text_max_length',
+				label: 'Maximum length of the scrolling text for all variables ending in "_short" (default: 9)',
+				min: 1,
+				max: 100,
+				default: 9,
+				width: 12,
+			},
+			{
+				type: 'number',
 				id: 'timer_interval',
-				label: '[Advanced] Status timer interval (default: 1000ms)',
-				min: 100,
+				label: '[Advanced] Status timer interval in milliseconds (default: 1000)',
+				min: 1000,
 				max: 60000,
 				default: 1000,
 				width: 12,
@@ -394,13 +406,14 @@ class instance extends instance_skel {
 	}
 
 	setVariables(status) {
+		let maxLength = this.config.scrolling_text_max_length
 		this.setVariable('stream_song_name', status['song'])
-		this.setVariable('stream_song_name_short', this.extractShortString(status['song'], 9))
+		this.setVariable('stream_song_name_short', this.extractShortString(status['song'], maxLength))
 		let pathParts = this.splitPathToDirectoryAndFileName(status['record path'])
 		this.setVariable('recording_file_path', pathParts[0])
-		this.setVariable('recording_file_path_short', this.extractShortString(pathParts[0], 9))
+		this.setVariable('recording_file_path_short', this.extractShortString(pathParts[0], maxLength))
 		this.setVariable('recording_file_name', pathParts[1])
-		this.setVariable('recording_file_name_short', this.extractShortString(pathParts[1], 9))
+		this.setVariable('recording_file_name_short', this.extractShortString(pathParts[1], maxLength))
 		this.setVariable('stream_duration', status['stream seconds'])
 		this.setVariable('stream_duration_hhmmss', this.secondsToHhMmSs(status['stream seconds']))
 		this.setVariable('recording_duration', status['record seconds'])
