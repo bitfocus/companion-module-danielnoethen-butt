@@ -26,5 +26,8 @@
 	"homepage": "https://github.com/bitfocus/companion-module-danielnoethen-butt#readme",
 	"devDependencies": {
 		"prettier": "^2.5.1"
+	},
+	"dependencies": {
+		"buttjs": "^0.1.0"
 	}
 }
