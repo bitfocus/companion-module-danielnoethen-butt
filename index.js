@@ -1,6 +1,5 @@
 const instance_skel = require('../../instance_skel')
-const { exec } = require('child_process')
-const fs = require('fs')
+const ButtClient = require('buttjs')
 
 class instance extends instance_skel {
 	/**
@@ -46,18 +45,9 @@ class instance extends instance_skel {
 		this.debug('config', this.config)
 
 		this.stopStatusTimer()
-		if (this.config.binary_path) {
-			fs.access(this.config.binary_path, fs.F_OK, (err) => {
-				if (err) {
-					this.status(this.STATE_ERROR, 'No BUTT binary found in the configured binary path')
-				} else {
-					this.status(this.STATE_OK, 'Configured binary path is valid')
-					this.startStatusTimer()
-				}
-			})
-		} else {
-			this.status(this.STATE_ERROR, 'No binary path set for BUTT')
-		}
+		this.buttClient = new ButtClient(this.config.server_ip, this.config.server_port)
+		this.status(this.STATE_OK, 'Loaded configuration successfully')
+		this.startStatusTimer()
 	}
 
 	init() {
@@ -81,13 +71,6 @@ class instance extends instance_skel {
 					'It should also be configured to run the server component and ' +
 					'listen on all network interfaces (command line argument -A). ' +
 					'See BUTT version support in the module HELP. Recommended version is 0.1.34.',
-			},
-			{
-				type: 'textinput',
-				id: 'binary_path',
-				label: 'BUTT binary path on the server (either butt or butt-client binary)',
-				width: 12,
-				required: true,
 			},
 			{
 				type: 'textinput',
@@ -196,98 +179,92 @@ class instance extends instance_skel {
 		this.setActions(actions)
 	}
 
-	invoke_binary = (args, success, failure) => {
-		let cmd = `${this.config.binary_path} -a ${this.config.server_ip} -p ${this.config.server_port} ${args.join(' ')}`
-		this.debug('invoke_binary', cmd)
-
-		exec(cmd, (error, stdout, stderr) => {
-			if (error) {
-				this.log('error', `exec error: ${error}, sdterr: ${stderr}, stdout: ${stdout}`)
-				if (failure) {
-					failure(stdout)
-				}
-			} else {
-				this.debug(`exec success, stdout: ${stdout}`)
-				if (success) {
-					success(stdout)
-				}
-			}
-		})
+	buttCallback = (err, _) => {
+		if (err) {
+			this.log('error', 'BUTT error: ' + err)
+		} else {
+			this.debug('BUTT success')
+		}
 	}
 
 	action(action) {
-		let args = {
-			start_streaming: ['-s'],
-			stop_streaming: ['-d'],
-			start_recording: ['-r'],
-			stop_recording: ['-t'],
-			split_recording: ['-n'],
-			set_streaming_signal_threshold: ['-M', action.options.threshold],
-			set_streaming_silence_threshold: ['-m', action.options.threshold],
-			set_recording_signal_threshold: ['-O', action.options.threshold],
-			set_recording_silence_threshold: ['-o', action.options.threshold],
-			update_song_name: ['-u', `"${action.options.song_name}"`],
-		}
-
-		var matchedArgs = []
 		if (action.action == 'toggle_streaming') {
-			if (this.serverStatus.connected == '1' || this.serverStatus.connecting == '1') {
-				matchedArgs = args.stop_streaming
+			if (this.serverStatus.connected || this.serverStatus.connecting) {
+				this.buttClient.stopStreaming(this.buttCallback)
 			} else {
-				matchedArgs = args.start_streaming
+				this.buttClient.startStreaming(this.buttCallback)
 			}
 		} else if (action.action == 'toggle_recording') {
-			if (this.serverStatus.recording == '1') {
-				matchedArgs = args.stop_recording
+			if (this.serverStatus.recording) {
+				this.buttClient.stopRecording(this.buttCallback)
 			} else {
-				matchedArgs = args.start_recording
+				this.buttClient.startRecording(this.buttCallback)
 			}
 		} else {
-			matchedArgs = args[action.action]
+			switch (action.action) {
+				case 'start_streaming':
+					this.buttClient.startStreaming(this.buttCallback)
+					break
+				case 'stop_streaming':
+					this.buttClient.stopStreaming(this.buttCallback)
+					break
+				case 'start_recording':
+					this.buttClient.startRecording(this.buttCallback)
+					break
+				case 'stop_recording':
+					this.buttClient.stopRecording(this.buttCallback)
+					break
+				case 'split_recording':
+					this.buttClient.splitRecording(this.buttCallback)
+					break
+				case 'set_streaming_signal_threshold':
+					this.buttClient.setStreamingSignalThreshold(action.options.threshold, this.buttCallback)
+					break
+				case 'set_streaming_silence_threshold':
+					this.buttClient.setStreamingSilenceThreshold(action.options.threshold, this.buttCallback)
+					break
+				case 'set_recording_signal_threshold':
+					this.buttClient.setRecordingSignalThreshold(action.options.threshold, this.buttCallback)
+					break
+				case 'set_recording_silence_threshold':
+					this.buttClient.setRecordingSilenceThreshold(action.options.threshold, this.buttCallback)
+					break
+				case 'update_song_name':
+					this.buttClient.updateSongName(action.options.song_name, this.buttCallback)
+					break
+			}
 		}
-
-		this.invoke_binary(matchedArgs)
 	}
 
 	startStatusTimer() {
 		this.ticks = 0
 		this.statusTimer = setInterval(() => {
-			this.invoke_binary(
-				['-S'],
-				(output) => {
+			this.buttClient.getStatus((err, buttStatus) => {
+				if (!err && buttStatus) {
 					// success
 					this.status(this.STATE_OK, JSON.stringify(buttStatus))
 					this.processStatus(buttStatus)
 					this.checkFeedbacks()
 					this.ticks++
-				},
-				(output) => {
+				} else {
 					// failure
 					this.status(
 						this.STATE_ERROR,
-						'Error while getting status, make sure BUTT server is running on the configured IP/port or restart it manually. Output: ' +
-							output
+						'Error while getting status, make sure BUTT server is running on the configured IP/port or restart it manually. Error: ' +
+							(err ? err : 'No status recieved')
 					)
-					this.processStatus('')
+					this.processStatus({})
 					this.checkFeedbacks()
 				}
-			)
+			})
 		}, this.config.timer_interval)
 		this.log('debug', 'BUTT status timer started')
 	}
 
-	processStatus(output) {
-		let lines = output.split('\n')
-		let status = {}
-		lines.forEach((line) => {
-			let [key, value] = line.split(':')
-			if (key) {
-				status[key] = value ? value.trim() : ''
-			}
-		})
-		this.setVariables(status)
-		this.serverStatus = status
-		this.debug('processStatus', status)
+	processStatus(buttStatus) {
+		this.setVariables(buttStatus)
+		this.serverStatus = buttStatus
+		this.debug('processStatus', buttStatus)
 	}
 
 	stopStatusTimer() {
@@ -407,21 +384,21 @@ class instance extends instance_skel {
 
 	setVariables(status) {
 		let maxLength = this.config.scrolling_text_max_length
-		this.setVariable('stream_song_name', status['song'])
-		this.setVariable('stream_song_name_short', this.extractShortString(status['song'], maxLength))
-		let pathParts = this.splitPathToDirectoryAndFileName(status['record path'])
+		this.setVariable('stream_song_name', status.song)
+		this.setVariable('stream_song_name_short', this.extractShortString(status.song, maxLength))
+		let pathParts = this.splitPathToDirectoryAndFileName(status.recPath)
 		this.setVariable('recording_file_path', pathParts[0])
 		this.setVariable('recording_file_path_short', this.extractShortString(pathParts[0], maxLength))
 		this.setVariable('recording_file_name', pathParts[1])
 		this.setVariable('recording_file_name_short', this.extractShortString(pathParts[1], maxLength))
-		this.setVariable('stream_duration', status['stream seconds'])
-		this.setVariable('stream_duration_hhmmss', this.secondsToHhMmSs(status['stream seconds']))
-		this.setVariable('recording_duration', status['record seconds'])
-		this.setVariable('recording_duration_hhmmss', this.secondsToHhMmSs(status['record seconds']))
-		this.setVariable('stream_data_sent', this.kiloBytesToHumanReadable(status['stream kBytes']))
-		this.setVariable('recording_data_saved', this.kiloBytesToHumanReadable(status['record kBytes']))
-		this.setVariable('volume_left', status['volume left'])
-		this.setVariable('volume_right', status['volume right'])
+		this.setVariable('stream_duration', status.streamSeconds)
+		this.setVariable('stream_duration_hhmmss', this.secondsToHhMmSs(status.streamSeconds))
+		this.setVariable('recording_duration', status.recordSeconds)
+		this.setVariable('recording_duration_hhmmss', this.secondsToHhMmSs(status.recordSeconds))
+		this.setVariable('stream_data_sent', this.kiloBytesToHumanReadable(status.streamKByte))
+		this.setVariable('recording_data_saved', this.kiloBytesToHumanReadable(status.recordKByte))
+		this.setVariable('volume_left', status.volumeLeft)
+		this.setVariable('volume_right', status.volumeRight)
 	}
 
 	STREAM_CONNECTING_STYLE = {
@@ -503,15 +480,15 @@ class instance extends instance_skel {
 	feedback(feedback) {
 		switch (feedback.type) {
 			case 'streaming_connected_status':
-				return this.serverStatus.connected == '1'
+				return this.serverStatus.connected
 			case 'streaming_connecting_status':
-				return this.serverStatus.connecting == '1'
+				return this.serverStatus.connecting
 			case 'recording_status':
-				return this.serverStatus.recording == '1'
+				return this.serverStatus.recording
 			case 'signal_presence_status':
-				return this.serverStatus['signal present'] == '1'
+				return this.serverStatus.signalDetected
 			case 'signal_transition_status':
-				return this.serverStatus['signal present'] == '0' && this.serverStatus['signal absent'] == '0'
+				return !this.serverStatus.signalDetected && !this.serverStatus.silenceDetected
 			case 'error_status':
 				return Object.keys(this.serverStatus).length == 0 // activate if empty
 		}
