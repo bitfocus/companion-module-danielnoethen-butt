@@ -26,6 +26,7 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 
 - Update song name
 
+Note: all threshold actions require butt 0.1.33 or higher.
 ### Feedback
 
 - Streaming status
@@ -39,14 +40,12 @@ A plugin for [Bitfocus Companion](https://bitfocus.io/) to control
 - Recording toggle button with feedback
 - Button with both signal status and error feedback
 
-### Variables (experimental)
+### Variables
+
+All variables below require butt 0.1.34 or higher:
 
 - Streaming song title
 - Recording path and filename
 - Streaming/recording duration
 - Streaming/recording bytes sent/saved
 - Volume levels (left/right)
-
-These variables are currently not available in the latest released version of BUTT
-(0.1.33 at the time of writing).
-They will only work if you have an unofficial edge version of BUTT.

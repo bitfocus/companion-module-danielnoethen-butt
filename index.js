@@ -80,7 +80,7 @@ class instance extends instance_skel {
 					'BUTT should be installed and configured on the server. ' +
 					'It should also be configured to run the server component and ' +
 					'listen on all network interfaces (command line argument -A). ' +
-					'Minimum supported version is 0.1.33.',
+					'See BUTT version support in the module HELP. Recommended version is 0.1.34.',
 			},
 			{
 				type: 'textinput',
@@ -256,8 +256,8 @@ class instance extends instance_skel {
 				['-S'],
 				(output) => {
 					// success
-					this.status(this.STATE_OK, output)
-					this.processStatus(output)
+					this.status(this.STATE_OK, JSON.stringify(buttStatus))
+					this.processStatus(buttStatus)
 					this.checkFeedbacks()
 					this.ticks++
 				},
