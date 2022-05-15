@@ -1,9 +1,9 @@
 {
 	"name": "danielnoethen-butt",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"api_version": "1.0.0",
 	"keywords": [
-		"BUTT"
+		"BUTT", "buttjs", "radio.co", "shoutcast", "icecast"
 	],
 	"manufacturer": "danielnoethen",
 	"product": "BUTT Controller (broadcast using this tool)",
